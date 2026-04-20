@@ -7,7 +7,7 @@ A deployable Python web app that extracts text from a handwritten document and a
 ```mermaid
 graph TD
     subgraph UI["Streamlit UI"]
-        Upload["File Uploaders<br/>(Handwritten + Printed)"]
+        Upload["File Uploaders<br/>(Handwritten + Printed)"]v
         ModeSelect["Mode Selector<br/>(OCR / API / Local Model)"]
     end
 
@@ -60,7 +60,7 @@ graph TD
 > **Mode 3 (Local Model):** This uses Microsoft's `TrOCR` from HuggingFace Transformers. It downloads ~900MB of model weights on first run and requires PyTorch. This will be behind a feature flag so you can remove it easily if needed.
 
 > [!NOTE]
-> **System Dependencies:** OCR mode requires `tesseract-ocr` and `poppler` installed on the system (for PDF→image conversion). On macOS: `brew install tesseract poppler`.
+> **System Dependencies:** OCR mode requires `tesseract-ocr` installed on the system. PDF→image conversion is handled by Python dependency `pymupdf`.
 
 ---
 
@@ -210,7 +210,7 @@ oopslab/
 
 #### [NEW] [file_handler.py](file:///Users/sampad/dev/oopslab/utils/file_handler.py)
 - `FileHandler.load(uploaded_file) -> List[PIL.Image]`
-- PDF → images via `pdf2image.convert_from_bytes()`
+- PDF → images via `PyMuPDF (fitz)` rendering
 - JPG/JPEG → `PIL.Image.open()`
 
 ---
@@ -249,7 +249,7 @@ oopslab/
 streamlit>=1.30.0
 pytesseract>=0.3.10
 easyocr>=1.7.0
-pdf2image>=1.16.3
+pymupdf>=1.24.0
 Pillow>=10.0.0
 opencv-python-headless>=4.8.0
 scikit-learn>=1.3.0

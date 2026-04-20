@@ -2,7 +2,7 @@
 File Handler — Loads uploaded files and converts them to PIL Images.
 
 Handles both image files (JPG, JPEG, PNG) and PDF documents.
-PDFs are converted to a list of page images using pdf2image.
+PDFs are converted to a list of page images using PyMuPDF.
 """
 
 from typing import List
@@ -68,8 +68,7 @@ class FileHandler:
         """
         Convert a PDF to a list of page images.
 
-        Uses pdf2image (which requires poppler-utils installed
-        on the system) to render each PDF page as a PIL Image.
+        Uses PyMuPDF to render each PDF page as a PIL Image.
 
         Args:
             file_bytes: Raw PDF bytes.
@@ -78,35 +77,29 @@ class FileHandler:
             List of PIL Images, one per PDF page.
 
         Raises:
-            RuntimeError: If poppler is not installed or conversion fails.
+            RuntimeError: If PyMuPDF is not installed or conversion fails.
         """
         try:
-            from pdf2image import convert_from_bytes
+            import io
+            import importlib
 
-            images = convert_from_bytes(
-                file_bytes,
-                dpi=300,      # High DPI for better OCR accuracy
-                fmt="png",
-            )
+            fitz = importlib.import_module("fitz")
 
-            # Ensure all images are RGB
+            pdf_doc = fitz.open(stream=file_bytes, filetype="pdf")
             rgb_images = []
-            for img in images:
+            for page in pdf_doc:
+                pix = page.get_pixmap(dpi=300, alpha=False)
+                img = Image.open(io.BytesIO(pix.tobytes("png")))
                 if img.mode != "RGB":
                     img = img.convert("RGB")
                 rgb_images.append(img)
 
+            pdf_doc.close()
             return rgb_images
 
         except ImportError:
             raise RuntimeError(
-                "pdf2image is not installed. Run: pip install pdf2image"
+                "PyMuPDF is not installed. Run: pip install pymupdf"
             )
         except Exception as e:
-            if "poppler" in str(e).lower():
-                raise RuntimeError(
-                    "Poppler is not installed. "
-                    "On macOS: brew install poppler | "
-                    "On Ubuntu: sudo apt-get install poppler-utils"
-                )
             raise RuntimeError(f"PDF conversion failed: {str(e)}")

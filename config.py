@@ -1,18 +1,19 @@
 """
-Configuration and constants for the Document Similarity Analyzer.
+Configuration and constants for the LLM Extraction Benchmarking Arena.
 Centralizes all app-wide settings, feature flags, and model names.
 """
 
+import os
 
 # ──────────────────────────────────────────────
 # App Metadata
 # ──────────────────────────────────────────────
-APP_TITLE = "📄 Document Similarity Analyzer"
+APP_TITLE = "🔬 LLM Extraction Benchmarking Arena"
 APP_DESCRIPTION = (
-    "Upload a handwritten document and a printed document, "
-    "then compare their textual similarity across multiple metrics."
+    "Benchmark, compare, and analyze text extraction models "
+    "across documents with scientific precision."
 )
-PAGE_ICON = "📄"
+PAGE_ICON = "🔬"
 LAYOUT = "wide"
 
 # ──────────────────────────────────────────────
@@ -22,10 +23,14 @@ SUPPORTED_IMAGE_TYPES = ["jpg", "jpeg", "png"]
 SUPPORTED_PDF_TYPES = ["pdf"]
 SUPPORTED_FILE_TYPES = SUPPORTED_IMAGE_TYPES + SUPPORTED_PDF_TYPES
 
+# Arena-specific: extensions to scan in dataset folders
+ARENA_SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif"}
+
 # ──────────────────────────────────────────────
 # Feature Flags
 # ──────────────────────────────────────────────
 ENABLE_LOCAL_MODEL = True  # Toggle Mode 3 (TrOCR) on/off
+ENABLE_PLUGINS = True      # Toggle BYOM plugin discovery
 
 # ──────────────────────────────────────────────
 # Extraction Modes
@@ -68,4 +73,27 @@ SIMILARITY_WEIGHTS = {
     "edit": 1.0,
     "tfidf": 1.0,
     "embedding": 1.0,
+}
+
+# ──────────────────────────────────────────────
+# Storage (Laboratory)
+# ──────────────────────────────────────────────
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(_BASE_DIR, "data")
+DB_PATH = os.path.join(DATA_DIR, "results.db")
+
+# ──────────────────────────────────────────────
+# Plugins (BYOM)
+# ──────────────────────────────────────────────
+PLUGINS_DIR = os.path.join(_BASE_DIR, "plugins")
+
+# ──────────────────────────────────────────────
+# Live Console Log Levels
+# ──────────────────────────────────────────────
+LOG_COLORS = {
+    "INFO":    "#58a6ff",   # Cyan-blue
+    "SUCCESS": "#5cfcb4",   # Green
+    "WARN":    "#fcbc5c",   # Amber
+    "ERROR":   "#fc5c7c",   # Red
+    "DEBUG":   "#6a6a80",   # Muted gray
 }

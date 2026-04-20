@@ -20,13 +20,13 @@ A full-stack, Object-Oriented web application implemented in Python and Streamli
 - Python 3.9+
 - On macOS:
   ```bash
-  brew install tesseract poppler
+  brew install tesseract
   ```
 - On Ubuntu/Linux:
   ```bash
-  sudo apt-get install tesseract-ocr poppler-utils
+  sudo apt-get install tesseract-ocr
   ```
-  *(Note: Poppler is required to convert PDF files into images. Tesseract is required for the baseline OCR mode).*
+  *(Note: Tesseract is required for the baseline OCR mode). PDF rendering is handled by the Python dependency `pymupdf`.*
 
 ## Setup Instructions
 

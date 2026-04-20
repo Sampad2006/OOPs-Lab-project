@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   Document Similarity Analyzer — Premium Dark Theme
+   LLM Extraction Benchmarking Arena — Premium Dark Theme
    ═══════════════════════════════════════════════════════════════ */
 
 /* Google Fonts */
@@ -136,7 +136,7 @@
     font-size: 1.3rem;
 }
 
-/* ── Upload Areas ───────────────────────────────────────────── */
+/* ── Upload Areas (Enhanced Drag & Drop) ───────────────────── */
 .upload-zone {
     border: 2px dashed var(--border-subtle);
     border-radius: var(--radius-md);
@@ -158,6 +158,33 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
     margin-bottom: 0.5rem;
+}
+
+/* Enhanced file uploader drop zones */
+[data-testid="stFileUploader"] {
+    border-radius: var(--radius-md);
+}
+
+[data-testid="stFileUploader"] > div {
+    border: 2px dashed rgba(124, 92, 252, 0.25) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 1.5rem !important;
+    min-height: 120px !important;
+    transition: all 0.3s ease !important;
+    background: rgba(124, 92, 252, 0.03) !important;
+}
+
+[data-testid="stFileUploader"] > div:hover {
+    border-color: var(--accent-primary) !important;
+    background: rgba(124, 92, 252, 0.08) !important;
+    box-shadow: 0 0 20px rgba(124, 92, 252, 0.15) !important;
+}
+
+[data-testid="stFileUploader"] > div > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 /* ── Score Cards ────────────────────────────────────────────── */
@@ -339,19 +366,155 @@
 }
 
 /* ── Status Indicators ──────────────────────────────────────── */
-.status-success {
-    color: var(--success);
+.status-success { color: var(--success); }
+.status-warning { color: var(--warning); }
+.status-error   { color: var(--danger); }
+
+/* ═══════════════════════════════════════════════════════════════
+   LIVE CONSOLE — Terminal-style extraction log
+   ═══════════════════════════════════════════════════════════════ */
+
+.live-console {
+    background: #0c0c14;
+    border: 1px solid rgba(124, 92, 252, 0.2);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin: 1rem 0;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
 }
 
-.status-warning {
-    color: var(--warning);
+.console-header {
+    background: rgba(20, 20, 35, 0.9);
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.status-error {
-    color: var(--danger);
+.console-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
 }
 
-/* ── Streamlit Overrides ────────────────────────────────────── */
+.console-dot.red    { background: #fc5c7c; }
+.console-dot.yellow { background: #fcbc5c; }
+.console-dot.green  { background: #5cfcb4; }
+
+.console-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #6a6a80;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-left: 0.5rem;
+}
+
+.console-body {
+    padding: 1rem;
+    max-height: 280px;
+    overflow-y: auto;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    line-height: 1.7;
+    position: relative;
+}
+
+/* Scanline effect */
+.console-body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(92, 252, 180, 0.01) 2px,
+        rgba(92, 252, 180, 0.01) 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+}
+
+.console-body::-webkit-scrollbar {
+    width: 4px;
+}
+
+.console-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.console-body::-webkit-scrollbar-thumb {
+    background: rgba(124, 92, 252, 0.3);
+    border-radius: 2px;
+}
+
+.console-line {
+    padding: 1px 0;
+    position: relative;
+    z-index: 2;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CONFIDENCE HEATMAP TEXT
+   ═══════════════════════════════════════════════════════════════ */
+
+.confidence-text {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TABS — Scientific aesthetic
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Style tab buttons */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 0.5rem;
+    background: rgba(20, 20, 35, 0.5);
+    border-radius: var(--radius-lg);
+    padding: 0.3rem;
+    border: 1px solid var(--border-subtle);
+}
+
+.stTabs [data-baseweb="tab"] {
+    border-radius: var(--radius-md);
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+    color: var(--text-primary);
+    background: rgba(124, 92, 252, 0.1);
+}
+
+.stTabs [aria-selected="true"] {
+    background: rgba(124, 92, 252, 0.15) !important;
+    color: var(--accent-primary) !important;
+    border-bottom: 2px solid var(--accent-primary) !important;
+}
+
+/* Hide default tab highlight bar */
+.stTabs [data-baseweb="tab-highlight"] {
+    display: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   STREAMLIT OVERRIDES
+   ═══════════════════════════════════════════════════════════════ */
+
 /* Hide Streamlit branding */
 #MainMenu { visibility: hidden; }
 footer { visibility: hidden; }
@@ -365,16 +528,6 @@ header { visibility: hidden; }
 
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
     color: var(--text-secondary);
-}
-
-/* Style file uploader */
-[data-testid="stFileUploader"] {
-    border-radius: var(--radius-md);
-}
-
-[data-testid="stFileUploader"] > div {
-    border-color: var(--border-subtle) !important;
-    border-radius: var(--radius-md) !important;
 }
 
 /* Style buttons */
@@ -431,4 +584,17 @@ header { visibility: hidden; }
 hr {
     border-color: var(--border-subtle) !important;
     opacity: 0.5;
+}
+
+/* Dataframe styling */
+[data-testid="stDataFrame"] {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+/* Multiselect chips */
+.stMultiSelect [data-baseweb="tag"] {
+    background: rgba(124, 92, 252, 0.2) !important;
+    border: 1px solid rgba(124, 92, 252, 0.3) !important;
+    border-radius: 20px !important;
 }
