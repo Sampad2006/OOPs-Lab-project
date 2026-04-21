@@ -1,3 +1,4 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
 # --- Backend Framework ---
 fastapi>=0.100.0         # Modern, fast web framework for building APIs
 uvicorn>=0.22.0          # ASGI web server implementation for FastAPI

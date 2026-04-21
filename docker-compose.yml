@@ -9,6 +9,8 @@ services:
       - "8000:8000"
     volumes:
       - ./data:/app/data # This ensures your results.db persists locally
+      - /Users/sampad/Downloads/images_small:/app/test_data/images_small
+      - /Users/sampad/Downloads/single_test:/app/test_data/single_test
 
   frontend:
     build:

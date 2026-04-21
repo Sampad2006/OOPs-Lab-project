@@ -1,5 +1,5 @@
 # Use a Node image to run the Vite server
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
