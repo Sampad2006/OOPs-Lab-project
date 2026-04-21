@@ -10,9 +10,16 @@ venv.bak/
 # Dataset
 test_data
 
-# Tar files
+# Archive / Large binary files
 *.tar
-
+*.tar.gz
+*.tgz
+*.zip
+*.rar
+*.7z
+*.bz2
+*.xz
+*.whl
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -49,6 +56,7 @@ wheels/
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
+pip_report.json
 
 # Unit test / coverage reports
 htmlcov/
@@ -68,7 +76,7 @@ coverage.xml
 *.mo
 *.pot
 
-# Django stuff:
+# Django stuff
 *.log
 local_settings.py
 db.sqlite3
@@ -84,4 +92,17 @@ db.sqlite3-journal
 .huggingface/
 .cache/
 
+# Dev/planning artifacts
 implementation_plan.md
+planning.md
+
+# Database files
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+
+# Vite cache
+.vite/
+
+# Node (redundant with frontend/.gitignore but safe to have)
+node_modules/
