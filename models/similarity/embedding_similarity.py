@@ -40,6 +40,9 @@ class EmbeddingSimilarity(SimilarityMetric):
     def _get_model(self):
         """Lazy-load the sentence transformer model."""
         if self._model is None:
+            import os
+            # Prevent connection reset errors by using the cached model
+            os.environ["HF_HUB_OFFLINE"] = "1"
             from sentence_transformers import SentenceTransformer
             self._model = SentenceTransformer(config.EMBEDDING_MODEL)
         return self._model

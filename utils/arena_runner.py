@@ -119,24 +119,27 @@ class ArenaRunner:
 
     def run(
         self,
-        progress_callback: Optional[Callable[[int, int, str], None]] = None
+        progress_callback: Optional[Callable[[int, int, str], None]] = None,
+        log_callback: Optional[Callable[[str, str], None]] = None,
     ) -> List[Dict]:
         """
         Run the benchmark: extract text from each image with each strategy,
         compare against ground truth, and collect results.
 
         Args:
-            progress_callback: Optional callback(current, total, status_msg)
-                               for progress updates.
+            progress_callback: Optional callback(current, total, status_msg).
+            log_callback:      Optional callback(level, message) for live logs.
 
         Returns:
-            List of result dicts with keys:
-                File, Strategy, Edit Similarity, TF-IDF Similarity,
-                Embedding Similarity, Final Similarity, Time (s), Word Count
+            List of result dicts.
         """
         pairs = self.scan_dataset()
         total_jobs = len(pairs) * len(self._strategies)
         current_job = 0
+
+        def log(level, msg):
+            if log_callback:
+                log_callback(level, msg)
 
         results = []
 
@@ -156,6 +159,8 @@ class ArenaRunner:
                 if progress_callback:
                     progress_callback(current_job, total_jobs, status)
 
+                log("INFO", f"Processing [{strategy.name}] → {file_name}")
+
                 try:
                     # Extract text
                     start_time = time.time()
@@ -168,8 +173,12 @@ class ArenaRunner:
                     extracted = TextPreprocessor.clean_ocr_output(extracted)
                     word_count = len(extracted.split()) if extracted else 0
 
+                    log("SUCCESS", f"[{strategy.name}] Extracted {word_count} words in {elapsed:.2f}s from {file_name}")
+
                     # Compare against ground truth
                     scores = self._aggregator.compute_all(extracted, gt_text)
+                    final = scores.get("Final Similarity", 0.0)
+                    log("INFO", f"[{strategy.name}] {file_name} → Final Score: {final:.4f}")
 
                     result = {
                         "File": file_name,
@@ -177,13 +186,14 @@ class ArenaRunner:
                         "Edit Similarity": scores.get("Edit Similarity", 0.0),
                         "TF-IDF Similarity": scores.get("TF-IDF Similarity", 0.0),
                         "Embedding Similarity": scores.get("Embedding Similarity", 0.0),
-                        "Final Similarity": scores.get("Final Similarity", 0.0),
+                        "Final Similarity": final,
                         "Time (s)": round(elapsed, 2),
                         "Word Count": word_count,
                         "Extracted Text": extracted[:200],  # Preview
                     }
 
                 except Exception as e:
+                    log("ERROR", f"[{strategy.name}] FAILED on {file_name}: {str(e)}")
                     result = {
                         "File": file_name,
                         "Strategy": strategy.name,

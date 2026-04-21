@@ -207,6 +207,122 @@ async def analyze_documents_stream(
 
     return StreamingResponse(sse_generator(), media_type="text/event-stream")
 
+@app.post("/api/arena/stream")
+async def analyze_arena_stream(
+    dataset_path: str = Form(...),
+    strategies: str = Form(...), # JSON string list of strategy names
+    api_keys: str = Form("{}") # JSON string dict of provider -> api key
+):
+    import json
+    from utils.arena_runner import ArenaRunner
+
+    try:
+        selected_strategies = json.loads(strategies)
+        keys_dict = json.loads(api_keys)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON format for strategies or api_keys")
+
+    def sse_generator():
+        q = queue.Queue()
+
+        def progress_cb(current, total, status):
+            q.put({"type": "progress", "current": current, "total": total, "status": status})
+
+        def worker():
+            try:
+                # Create strategy instances
+                strategy_instances = []
+                for m in selected_strategies:
+                    kwargs = {}
+                    if "api" in m.lower():
+                        if "Groq" in m:
+                            kwargs["provider"] = "groq"
+                            kwargs["model_name"] = "meta-llama/llama-4-scout-17b-16e-instruct"
+                            k = keys_dict.get("groq")
+                        else:
+                            kwargs["provider"] = "gemini"
+                            kwargs["model_name"] = "gemini-2.5-flash"
+                            k = keys_dict.get("gemini")
+                            
+                        if not k:
+                            raise Exception(f"API Key is required for API Mode ({m})")
+                        kwargs["api_key"] = k
+                            
+                    strategy_instances.append(StrategyFactory.create(m, **kwargs))
+
+                runner = ArenaRunner(dataset_path=dataset_path, strategies=strategy_instances)
+                
+                # Pre-scan dataset to validate
+                q.put({"type": "log", "level": "INFO", "message": f"Scanning dataset at {dataset_path}..."})
+                pairs = runner.scan_dataset()
+                q.put({"type": "log", "level": "SUCCESS", "message": f"Found {len(pairs)} image + ground-truth pairs."})
+
+                # Run benchmark
+                results = runner.run(progress_callback=progress_cb, log_callback=lambda lvl, msg: q.put({"type": "log", "level": lvl, "message": msg}))
+                
+                # Compute summary
+                summary = ArenaRunner.compute_arena_scores(results)
+                
+                q.put({"type": "done", "result": {"results": results, "summary": summary}})
+
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                q.put({"type": "error", "message": str(e)})
+
+        threading.Thread(target=worker, daemon=True).start()
+
+        while True:
+            item = q.get()
+            if item["type"] == "log":
+                yield f"event: log\ndata: {json.dumps({'level': item['level'], 'message': item['message']})}\n\n"
+            elif item["type"] == "progress":
+                yield f"event: progress\ndata: {json.dumps({'current': item['current'], 'total': item['total'], 'status': item['status']})}\n\n"
+            elif item["type"] == "done":
+                yield f"event: result\ndata: {json.dumps(item['result'])}\n\n"
+                break
+            elif item["type"] == "error":
+                yield f"event: error\ndata: {json.dumps({'detail': item['message']})}\n\n"
+                break
+
+    return StreamingResponse(sse_generator(), media_type="text/event-stream")
+
+from pydantic import BaseModel
+from typing import Dict, Any, Optional
+
+class SaveHistoryRequest(BaseModel):
+    view: str
+    strategy: str
+    file_name: str
+    scores: Dict[str, float]
+    metadata: Optional[Dict[str, Any]] = None
+
+@app.post("/api/history/save")
+async def save_history(req: SaveHistoryRequest):
+    try:
+        from utils.storage import ResultsStore
+        store = ResultsStore()
+        run_id = store.save_run(
+            view=req.view,
+            strategy=req.strategy,
+            file_name=req.file_name,
+            scores=req.scores,
+            metadata=req.metadata
+        )
+        return {"success": True, "run_id": run_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/history")
+async def get_history(view: str = None, limit: int = 100):
+    try:
+        from utils.storage import ResultsStore
+        store = ResultsStore()
+        runs = store.get_runs(view=view, limit=limit)
+        return {"runs": runs}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("api:app", host="0.0.0.0", port=8000, reload=True)
