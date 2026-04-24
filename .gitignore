@@ -9,6 +9,7 @@ venv.bak/
 
 # Dataset
 test_data
+datasetPreparation/
 
 # Archive / Large binary files
 *.tar
